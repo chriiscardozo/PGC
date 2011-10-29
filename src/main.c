@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "pgc.h"
 
 struct Data{
        int dia;
@@ -10,12 +11,13 @@ struct Data{
 
 struct Cliente{
        int id;
-       char *nome;
-       char *email;
+       char nome[500];
+       char email[500];
        char telefone[8];
        char celular[8];
        float saldo;
        struct Data vencimento;
+       int linha;
 };
 
 float leNumero(){
@@ -25,17 +27,8 @@ float leNumero(){
     return n;
 }
 
-void telaInicial(){
-     printf("\t\t\t ------------------ \n");
-     printf("\t\t\t| Bem-vindo ao PGC |\n");
-     printf("\t\t\t ------------------ \n");
-     printf("\n\n\t\t Programa de Gerenciamento de Clientes\n\n\n\n");
-     printf("\t\t\t\t:) \n\n\n\n");
-     printf("\n\n\n\n\n\nPressione <ENTER> para continuar");
-     getchar();
-}
-
-void menuPrincipal(){
+/* MAIN MENU */
+int menuPrincipal(){
      int op;
      do{
          system("cls");
@@ -55,19 +48,45 @@ void menuPrincipal(){
          
      }while(op < 1 || op > 6);
      
-     if(op == 1) printf("novo");
-     else if(op == 2) printf("apagar");
-     else if(op == 3) printf("alterar");
-     else if(op == 4) printf("cliente");
-     else if(op == 5) printf("todos");
-     else exit(0);
-             
+     return op;
+}
+
+/* FIRST DISPLAY */
+void telaInicial(){
+     printf("\t\t\t ------------------ \n");
+     printf("\t\t\t| Bem-vindo ao PGC |\n");
+     printf("\t\t\t ------------------ \n");
+     printf("\n\n\t\t Programa de Gerenciamento de Clientes\n\n\n\n");
+     printf("\t\t\t\t:) \n\n\n\n");
+     printf("\n\n\n\n\n\nPressione <ENTER> para continuar");
+     getchar();
+}
+
+void exibirDados(){
+     int id;
+     struct Cliente c;
+     printf("\n\nDigite o ID do cliente: ");
+     id = leNumero();
+     if(buildClienteById(&c, id)){
+        printf("\nID: %d\nNome:%s\n", c.id, c.nome);
+        printf("\n\n<ENTER>");
+        getchar();
+     }
 }
 
 int main(){
-    
+    int op;
     telaInicial();
-    menuPrincipal();
+    
+    do{
+       op = menuPrincipal();
+       
+       if(op == 1) printf("novo");
+       else if(op == 2) printf("apagar");
+       else if(op == 3) printf("alterar");
+       else if(op == 4) exibirDados();
+       else if(op == 5) printf("todos");
+    }while(op != 6);
     
     printf("\n\nFIM");
     

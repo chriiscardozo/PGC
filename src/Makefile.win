@@ -5,8 +5,8 @@ CPP  = g++.exe -D__DEBUG__
 CC   = gcc.exe -D__DEBUG__
 WINDRES = windres.exe
 RES  = 
-OBJ  = main.o $(RES)
-LINKOBJ  = main.o $(RES)
+OBJ  = main.o test.o pgc.o $(RES)
+LINKOBJ  = main.o test.o pgc.o $(RES)
 LIBS =   -g3 
 INCS = 
 CXXINCS =  -I"C:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"C:/Dev-Cpp/include/c++/3.4.2/backward"  -I"C:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"C:/Dev-Cpp/include/c++/3.4.2"  -I"C:/Dev-Cpp/include" 
@@ -28,3 +28,9 @@ $(BIN): $(OBJ)
 
 main.o: main.c
 	$(CC) -c main.c -o main.o $(CFLAGS)
+
+test.o: test.c
+	$(CC) -c test.c -o test.o $(CFLAGS)
+
+pgc.o: pgc.c
+	$(CC) -c pgc.c -o pgc.o $(CFLAGS)
