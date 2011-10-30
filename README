@@ -1,0 +1,37 @@
+	   *****************************************************
+	   *****************************************************
+	   ****                                             ****
+	   **** PGC - PROGRAMA DE GERENCIAMENTO DE CLIENTES ****
+	   ****                                             ****
+	   *****************************************************
+	   *****************************************************
+
+Language: C
+Platform: Windows
+
+
+/* Sobre o PGC */
+
+Simples programa feito em C que funciona como uma agenda de clientes guardando informações básicas como nome, telefones de contato, saldo, prazo máximo de pagamento, etc.
+Não foi usado nenhum SGBD. As informações são guardadas em arquivos .pgc na pasta 'database' e são acessadas pelas funções de manipulação de arquivos em C.
+
+
+
+/* Sobre a organização das informações */
+
+Cada 'campo' de cliente possui um arquivo .pgc e as informações são dispostas de forma que cada linha do arquivo pertença a um determinado cliente, facilitando assim o acesso às informações pelo programa.
+
+
+
+--------------------------------------------------------------------------------------
+
+About the "PGC" - Client Management Program
+
+A simple program made in C that work like a client agenda. Save basics informations like name, contact numbers, balance, max. time of payment, etc.
+This program don't use any SGDB(DBMS - database management system). The data is save in files .pgc, in the path 'database'. The data is accessed by file manipulation functions in C.
+
+
+
+About the organization of information
+
+Each client 'field' has a file in .pgc and the information is arranged so that each row belong a client.

@@ -3,34 +3,16 @@
 #include <string.h>
 #include "pgc.h"
 
-#define F_READ "r"
-#define F_WRITE "w"
-#define F_READ_WRITE "rw"
-
-#define DATABASE_ID_CLIENTE "database\\idCliente.pgc"
-#define DATABASE_NOME_CLIENTE "database\\nomeCliente.pgc"
-#define DATABASE_EMAIL_CLIENTE "database\\emailCliente.pgc"
-#define DATABASE_CELULAR_CLIENTE "database\\celularCliente.pgc"
-#define DATABASE_TELEFONE_CLIENTE "database\\telefoneCliente.pgc"
-#define DATABASE_SALDO_CLIENTE "database\\saldoCliente.pgc"
-#define DATABASE_VENCIMENTO_CLIENTE "database\\vencimentoCliente.pgc"
-
-struct Data{
-       int dia;
-       int mes;
-       int ano;
-};
-
-struct Cliente{
-       int id;
-       char nome[500];
-       char email[500];
-       char telefone[8];
-       char celular[8];
-       float saldo;
-       struct Data vencimento;
-       int linha;
-};
+/* IMPRIME A STRUCT CLIENTE */
+void printCliente(struct Cliente *c){
+     printf("\nID: %d\n", c->id);
+     printf("Nome: %s\n", c->nome);
+     printf("Telefone: %s\tCelular: %s\n", c->telefone, c->celular);
+     printf("Email: %s\n", c->email);
+     printf("Saldo: %.2f\n", c->saldo);
+     printf("Prazo de pagamento: %.2d/%.2d/%.2d\n",
+             c->vencimento.dia, c->vencimento.mes, c->vencimento.ano);
+}
 
 /* INICIALIZA A STRUCT CLIENTE */
 void initCliente(struct Cliente *c){
@@ -46,44 +28,6 @@ void initCliente(struct Cliente *c){
      c->vencimento.dia = 0;
      c->vencimento.mes = 0;
      c->vencimento.ano = 0;     
-}
-
-/* SELECIONA NOME DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
-int buildNome(struct Cliente *c){
-    FILE *f = NULL;
-    int linha = 0;
-    
-    f = fopen(DATABASE_NOME_CLIENTE, F_READ);
-    if(!f){
-       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
-       getchar();
-       return 0;
-    }
-    
-    while(!feof(f)){
-       char aux[500];
-       
-       linha++;
-       fgets(aux, 499, f);
-
-       if(linha == c->linha){
-                strcpy(c->nome, aux);
-                
-                if(fclose(f)){
-                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-                   getchar();
-                }
-                
-                return 1;
-       }
-    }
-    
-    if(fclose(f)){
-       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-       getchar();
-    }
-    
-    return 0; 
 }
 
 /* INICIALIZA O ID E A LINHA DO CLIENTE NA BASE DE DADOS */
@@ -122,6 +66,247 @@ int buildId(struct Cliente *c, int id){
      return 0;
 }
 
+/* SELECIONA NOME DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
+int buildNome(struct Cliente *c){
+    FILE *f = NULL;
+    int linha = 0;
+    
+    f = fopen(DATABASE_NOME_CLIENTE, F_READ);
+    if(!f){
+       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
+       getchar();
+       return 0;
+    }
+    
+    while(!feof(f)){
+       char aux[500] = { 0 };
+       
+       linha++;
+       fgets(aux, 499, f);
+
+       if(linha == c->linha){
+                int ultChar = strlen(aux) - 1;
+                
+                if(aux[ultChar] == 10) aux[ultChar] = 0;
+                
+                strcpy(c->nome, aux);
+                
+                if(fclose(f)){
+                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+                   getchar();
+                }
+                
+                return 1;
+       }
+    }
+    
+    if(fclose(f)){
+       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+       getchar();
+    }
+    
+    return 0; 
+}
+
+/* SELECIONA TELEFONE DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
+int buildTelefone(struct Cliente *c){
+    FILE *f = NULL;
+    int linha = 0;
+    
+    f = fopen(DATABASE_TELEFONE_CLIENTE, F_READ);
+    if(!f){
+       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
+       getchar();
+       return 0;
+    }
+    
+    while(!feof(f)){
+       char aux[10] = { 0 };
+       
+       linha++;
+       fgets(aux, 10, f);
+
+       if(linha == c->linha){
+                aux[8] = 0;
+                strcpy(c->telefone, aux);
+                
+                if(fclose(f)){
+                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+                   getchar();
+                }
+                
+                return 1;
+       }
+    }
+    
+    if(fclose(f)){
+       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+       getchar();
+    }
+    
+    return 0; 
+}
+
+/* SELECIONA CELULAR DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
+int buildCelular(struct Cliente *c){
+    FILE *f = NULL;
+    int linha = 0;
+    
+    f = fopen(DATABASE_CELULAR_CLIENTE, F_READ);
+    if(!f){
+       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
+       getchar();
+       return 0;
+    }
+    
+    while(!feof(f)){
+       char aux[10] = { 0 };
+       
+       linha++;
+       fgets(aux, 10, f);
+
+       if(linha == c->linha){
+                aux[8] = 0;
+                strcpy(c->celular, aux);
+                
+                if(fclose(f)){
+                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+                   getchar();
+                }
+                
+                return 1;
+       }
+    }
+    
+    if(fclose(f)){
+       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+       getchar();
+    }
+    
+    return 0; 
+}
+
+/* SELECIONA EMAIL DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
+int buildEmail(struct Cliente *c){
+    FILE *f = NULL;
+    int linha = 0;
+    
+    f = fopen(DATABASE_EMAIL_CLIENTE, F_READ);
+    if(!f){
+       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
+       getchar();
+       return 0;
+    }
+    
+    while(!feof(f)){
+       char aux[500] = { 0 };
+       
+       linha++;
+       fgets(aux, 499, f);
+
+       if(linha == c->linha){
+                int ultChar = strlen(aux) - 1;
+                
+                if(aux[ultChar] == 10) aux[ultChar] = 0;
+                
+                strcpy(c->email, aux);
+                
+                if(fclose(f)){
+                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+                   getchar();
+                }
+                
+                return 1;
+       }
+    }
+    
+    if(fclose(f)){
+       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+       getchar();
+    }
+    
+    return 0; 
+}
+
+/* SELECIONA SALDO DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
+int buildSaldo(struct Cliente *c){
+    FILE *f = NULL;
+    int linha = 0;
+    
+    f = fopen(DATABASE_SALDO_CLIENTE, F_READ);
+    if(!f){
+       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
+       getchar();
+       return 0;
+    }
+    
+    while(!feof(f)){
+       float aux = 0;
+       
+       linha++;
+       fscanf(f, "%f", &aux);
+       if(linha == c->linha){
+                
+                c->saldo = aux;
+                
+                if(fclose(f)){
+                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+                   getchar();
+                }
+                
+                return 1;
+       }
+    }
+    
+    if(fclose(f)){
+       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+       getchar();
+    }
+    
+    return 0; 
+}
+
+/* SELECIONA PRAZO DE VENCIMENTO DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
+int buildVencimento(struct Cliente *c){
+    FILE *f = NULL;
+    int linha = 0;
+    
+    f = fopen(DATABASE_VENCIMENTO_CLIENTE, F_READ);
+    if(!f){
+       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
+       getchar();
+       return 0;
+    }
+    
+    while(!feof(f)){
+       int d, m, a;
+       d = m = a = 0;
+       
+       linha++;
+       fscanf(f, "%d%d%d", &d, &m, &a);
+       if(linha == c->linha){
+                
+                c->vencimento.dia = d;
+                c->vencimento.mes = m;
+                c->vencimento.ano = a;
+                
+                if(fclose(f)){
+                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+                   getchar();
+                }
+                
+                return 1;
+       }
+    }
+    
+    if(fclose(f)){
+       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
+       getchar();
+    }
+    
+    return 0; 
+}
+
 /* CONSTROI INFORMAÇÕES DO CLIENTE PELO DO ID*/
 int buildClienteById(struct Cliente *c, int id){
      
@@ -136,10 +321,65 @@ int buildClienteById(struct Cliente *c, int id){
      }
      
      if(!buildNome(c)){
-        printf("ERRO: erro ao procurar nome\n<ENTER>");
+        printf("ERRO: erro ao procurar nome(ID: %d)\n<ENTER>", c->id);
+        getchar();
+        return 0;
+     }
+     
+     if(!buildTelefone(c)){
+        printf("ERRO: erro ao procurar telefone\n<ENTER>");
+        getchar();
+        return 0;
+     }
+     
+     if(!buildCelular(c)){
+        printf("ERRO: erro ao procurar celular\n<ENTER>");
+        getchar();
+        return 0;
+     }
+     
+     if(!buildEmail(c)){
+        printf("ERRO: erro ao procurar Email\n<ENTER>");
+        getchar();
+        return 0;
+     }
+     
+     if(!buildSaldo(c)){
+        printf("ERRO: erro ao procurar saldo\n<ENTER>");
+        getchar();
+        return 0;
+     }
+     
+     if(!buildVencimento(c)){
+        printf("ERRO: erro ao procurar data de pagamento\n<ENTER>");
         getchar();
         return 0;
      }
      
      return 1;
+}
+
+void exibirTodosDados(){
+     FILE *f = NULL;
+     
+     f = fopen(DATABASE_ID_CLIENTE, F_READ);
+     if(!f){
+        printf("ERRO: Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
+        getchar();
+        return ;
+     }
+     
+     while(!feof(f)){
+        struct Cliente c;
+        int id;
+        fscanf(f, "%d", &id);
+        
+        if(buildClienteById(&c, id))
+           printCliente(&c);
+     }
+     
+     if(fclose(f)){
+        printf("ERRO: Problemas ao fechar o arquivo de dados\n<ENTER>");
+        getchar();
+     }
 }
