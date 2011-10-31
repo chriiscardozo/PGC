@@ -16,18 +16,39 @@ void printCliente(struct Cliente *c){
 
 /* INICIALIZA A STRUCT CLIENTE */
 void initCliente(struct Cliente *c){
-     c->id = 0;
      
      memset(c->nome, 0, sizeof(char) * strlen(c->nome));
      memset(c->email, 0, sizeof(char) * strlen(c->email));
      memset(c->telefone, 0, sizeof(char) * strlen(c->telefone));
      memset(c->celular, 0, sizeof(char) * strlen(c->celular));
      
+     c->id = 0;
      c->linha = 0;
      c->saldo = 0;
      c->vencimento.dia = 0;
      c->vencimento.mes = 0;
-     c->vencimento.ano = 0;     
+     c->vencimento.ano = 0;
+}
+
+/* ABRE ARQUIVO E RETORNA SEU PONTEIRO */
+FILE * abreArquivo(char caminho[], char modo[]){
+    FILE *f = fopen(caminho, modo);
+    
+    if(!f){
+           printf("ERRO: Ocorreu um erro ao tentar ler o arquivo de dados\n<ENTER>");
+           getchar();
+           return 0;
+    }
+    
+    return f;
+}
+
+/* FECHA UM ARQUIVO */
+void fechaArquivo(FILE *f){
+    if(fclose(f)){
+        printf("ERRO: Problemas ao fechar o arquivo de dados\n<ENTER>");
+        getchar();
+     }
 }
 
 /* INICIALIZA O ID E A LINHA DO CLIENTE NA BASE DE DADOS */
@@ -35,12 +56,8 @@ int buildId(struct Cliente *c, int id){
      FILE *f = NULL;
      int linha = 0;
      
-     f = fopen(DATABASE_ID_CLIENTE, F_READ);
-     if(!f){
-            printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
-            getchar();
-            return 0;
-     }
+     f = abreArquivo(DATABASE_ID_CLIENTE, F_READ);
+     if(!f) return 0;
      
      while(!feof(f)){
         int aux;
@@ -58,12 +75,9 @@ int buildId(struct Cliente *c, int id){
         }
      }
      
-     if(fclose(f)){
-        printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-        getchar();
-     }
+     fechaArquivo(f);
      
-     return 0;
+     return 1;
 }
 
 /* SELECIONA NOME DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
@@ -71,12 +85,8 @@ int buildNome(struct Cliente *c){
     FILE *f = NULL;
     int linha = 0;
     
-    f = fopen(DATABASE_NOME_CLIENTE, F_READ);
-    if(!f){
-       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
-       getchar();
-       return 0;
-    }
+    f = abreArquivo(DATABASE_NOME_CLIENTE, F_READ);
+    if(!f) return 0;
     
     while(!feof(f)){
        char aux[500] = { 0 };
@@ -100,12 +110,9 @@ int buildNome(struct Cliente *c){
        }
     }
     
-    if(fclose(f)){
-       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-       getchar();
-    }
+    fechaArquivo(f);
     
-    return 0; 
+    return 1; 
 }
 
 /* SELECIONA TELEFONE DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
@@ -113,12 +120,8 @@ int buildTelefone(struct Cliente *c){
     FILE *f = NULL;
     int linha = 0;
     
-    f = fopen(DATABASE_TELEFONE_CLIENTE, F_READ);
-    if(!f){
-       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
-       getchar();
-       return 0;
-    }
+    f = abreArquivo(DATABASE_TELEFONE_CLIENTE, F_READ);
+    if(!f) return 0;
     
     while(!feof(f)){
        char aux[10] = { 0 };
@@ -139,12 +142,9 @@ int buildTelefone(struct Cliente *c){
        }
     }
     
-    if(fclose(f)){
-       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-       getchar();
-    }
+    fechaArquivo(f);
     
-    return 0; 
+    return 1; 
 }
 
 /* SELECIONA CELULAR DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
@@ -152,12 +152,8 @@ int buildCelular(struct Cliente *c){
     FILE *f = NULL;
     int linha = 0;
     
-    f = fopen(DATABASE_CELULAR_CLIENTE, F_READ);
-    if(!f){
-       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
-       getchar();
-       return 0;
-    }
+    f = abreArquivo(DATABASE_CELULAR_CLIENTE, F_READ);
+    if(!f) return 0;
     
     while(!feof(f)){
        char aux[10] = { 0 };
@@ -178,12 +174,9 @@ int buildCelular(struct Cliente *c){
        }
     }
     
-    if(fclose(f)){
-       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-       getchar();
-    }
+    fechaArquivo(f);
     
-    return 0; 
+    return 1; 
 }
 
 /* SELECIONA EMAIL DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
@@ -191,12 +184,8 @@ int buildEmail(struct Cliente *c){
     FILE *f = NULL;
     int linha = 0;
     
-    f = fopen(DATABASE_EMAIL_CLIENTE, F_READ);
-    if(!f){
-       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
-       getchar();
-       return 0;
-    }
+    f = abreArquivo(DATABASE_EMAIL_CLIENTE, F_READ);
+    if(!f) return 0;
     
     while(!feof(f)){
        char aux[500] = { 0 };
@@ -220,12 +209,9 @@ int buildEmail(struct Cliente *c){
        }
     }
     
-    if(fclose(f)){
-       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-       getchar();
-    }
+    fechaArquivo(f);
     
-    return 0; 
+    return 1; 
 }
 
 /* SELECIONA SALDO DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
@@ -233,12 +219,8 @@ int buildSaldo(struct Cliente *c){
     FILE *f = NULL;
     int linha = 0;
     
-    f = fopen(DATABASE_SALDO_CLIENTE, F_READ);
-    if(!f){
-       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
-       getchar();
-       return 0;
-    }
+    f = abreArquivo(DATABASE_SALDO_CLIENTE, F_READ);
+    if(!f) return 0;
     
     while(!feof(f)){
        float aux = 0;
@@ -258,12 +240,9 @@ int buildSaldo(struct Cliente *c){
        }
     }
     
-    if(fclose(f)){
-       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-       getchar();
-    }
+    fechaArquivo(f);
     
-    return 0; 
+    return 1; 
 }
 
 /* SELECIONA PRAZO DE VENCIMENTO DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
@@ -271,12 +250,8 @@ int buildVencimento(struct Cliente *c){
     FILE *f = NULL;
     int linha = 0;
     
-    f = fopen(DATABASE_VENCIMENTO_CLIENTE, F_READ);
-    if(!f){
-       printf("Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
-       getchar();
-       return 0;
-    }
+    f = abreArquivo(DATABASE_VENCIMENTO_CLIENTE, F_READ);
+    if(!f) return 0;
     
     while(!feof(f)){
        int d, m, a;
@@ -299,12 +274,9 @@ int buildVencimento(struct Cliente *c){
        }
     }
     
-    if(fclose(f)){
-       printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-       getchar();
-    }
+    fechaArquivo(f);
     
-    return 0; 
+    return 1; 
 }
 
 /* CONSTROI INFORMAÇÕES DO CLIENTE PELO DO ID*/

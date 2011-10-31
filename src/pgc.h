@@ -1,6 +1,6 @@
 #define F_READ "r"
 #define F_WRITE "w"
-#define F_READ_WRITE "rw"
+#define F_READ_WRITE "r+"
 
 #define DATABASE_ID_CLIENTE "database\\idCliente.pgc"
 #define DATABASE_NOME_CLIENTE "database\\nomeCliente.pgc"
@@ -26,6 +26,10 @@ struct Cliente{
        struct Data vencimento;
        int linha;
 };
+
+extern void fechaArquivo(FILE *f);
+
+extern FILE* abreArquivo(char *caminho, char *modo);
 
 extern void initCliente(struct Cliente *c);
 
