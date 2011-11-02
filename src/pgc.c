@@ -1,7 +1,18 @@
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #include "pgc.h"
+
+/* SETA A DATA PARA O DIA ATUAL */
+void hojeIs(struct Data *h){
+     time_t now = time(NULL);
+     struct tm *t = localtime(&now);
+
+     h->dia = t->tm_mday;
+     h->mes = t->tm_mon+1;
+     h->ano = t->tm_year+1900;
+}
 
 /* IMPRIME A STRUCT CLIENTE */
 void printCliente(struct Cliente *c){
@@ -30,6 +41,12 @@ void initCliente(struct Cliente *c){
      c->vencimento.ano = 0;
 }
 
+/* INICIALIZA A STRUCT RESULTADOPESQUISA */
+void initResultadoPesquisa(struct ResultadoPesquisa *r){
+     r->qtd = 0;
+     r->resultado = NULL;
+}
+
 /* ABRE ARQUIVO E RETORNA SEU PONTEIRO */
 FILE * abreArquivo(char caminho[], char modo[]){
     FILE *f = fopen(caminho, modo);
@@ -50,6 +67,30 @@ void fechaArquivo(FILE *f){
         getchar();
      }
 }
+
+/* RECEBE A LINHA E RETORNA O ID REFERENTE A ESTA */
+int qualId(int linha){
+    FILE *f = NULL;
+    int i;
+    
+    f = abreArquivo(DATABASE_ID_CLIENTE, F_READ);
+    if(!f) return 0;
+    
+    for(i = 1; !feof(f); i++){
+       int aux;
+       
+       fscanf(f, "%d", &aux);
+       if(i == linha){
+          fechaArquivo(f);
+          return aux;
+       }
+    }
+    
+    fechaArquivo(f);
+    
+    return 0;
+}
+
 
 /* INICIALIZA O ID E A LINHA DO CLIENTE NA BASE DE DADOS */
 int buildId(struct Cliente *c, int id){
@@ -331,6 +372,7 @@ int buildClienteById(struct Cliente *c, int id){
      return 1;
 }
 
+/* EXIBE TODOS OS DADOS DE TODOS OS CLIENTES */
 void exibirTodosDados(){
      FILE *f = NULL;
      
@@ -353,5 +395,153 @@ void exibirTodosDados(){
      if(fclose(f)){
         printf("ERRO: Problemas ao fechar o arquivo de dados\n<ENTER>");
         getchar();
+     }
+}
+
+/* PESQUISA UM NOME E RETORNA UM ARRAY ID DE OCORRENCIAS */
+void buscarNome(struct ResultadoPesquisa *r, char *pesquisa){
+    FILE *f = NULL;
+    int linha = 0;
+    
+    f = abreArquivo(DATABASE_NOME_CLIENTE, F_READ);
+    if(!f) return ;
+    
+    initResultadoPesquisa(r);
+    
+    while(!feof(f)){
+       char aux[500] = { 0 };
+       
+       linha++;
+       fgets(aux, 499, f);
+       
+       if( strstr(strupr(aux), pesquisa) ){
+          
+          r->qtd++;
+          if(r->qtd == 1){ //primeiro resultado da busca
+             r->resultado = (int*) malloc(sizeof(int));
+             r->resultado[0] = qualId(linha);
+             if(!r->resultado[0]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
+                printf("ERRO: ID nao existe para sua referencia\n");
+                free(r->resultado);
+                r->resultado = NULL;
+                r->qtd = 0;
+                return ;
+             }
+          }
+          
+          else{
+             r->resultado = (int*) realloc(r->resultado, r->qtd * sizeof(int));
+             r->resultado[r->qtd - 1] = qualId(linha);
+             
+             if(!r->resultado[r->qtd-1]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
+                printf("ERRO: ID nao existe para sua referencia\n");
+                free(r->resultado);
+                r->resultado = NULL;
+                r->qtd = 0;
+                return ;
+             }
+          }
+       }
+    }
+}
+
+/* BUSCA CLIENTES COM SALDO MAIOR( MODO = 1 ) OU MENOR( MODO = 2 ) QUE UM VALOR */
+void buscarSaldo(struct ResultadoPesquisa *r, float valor, int modo){
+     FILE *f = NULL;
+     int linha = 0;
+     
+     f = abreArquivo(DATABASE_SALDO_CLIENTE, F_READ);
+     if(!f) return ;
+     
+     initResultadoPesquisa(r);
+     
+     while(!feof(f)){
+        int cond = 0;
+        float aux;
+        
+        linha++;
+        fscanf(f, "%f", &aux);
+        
+        if(modo == MAIOR_QUE){
+                if(aux > valor) cond = 1;
+        }
+        else{
+           if(aux < valor) cond = 1;
+        }
+        
+        if(cond){
+           
+           r->qtd++;
+           if(r->qtd == 1){ //primeiro resultado da busca
+              r->resultado = (int*) malloc(sizeof(int));
+              r->resultado[0] = qualId(linha);
+              if(!r->resultado[0]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
+                 printf("ERRO: ID nao existe para sua referencia\n");
+                 free(r->resultado);
+                 r->resultado = NULL;
+                 r->qtd = 0;
+                 return ;
+              }
+           }
+           
+           else{
+              r->resultado = (int*) realloc(r->resultado, r->qtd * sizeof(int));
+              r->resultado[r->qtd - 1] = qualId(linha);
+              
+              if(!r->resultado[r->qtd-1]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
+                 printf("ERRO: ID nao existe para sua referencia\n");
+                 free(r->resultado);
+                 r->resultado = NULL;
+                 r->qtd = 0;
+                 return ;
+              }
+           }
+        }
+     }
+}
+
+void pesquisarPrazoAte(struct ResultadoPesquisa *r, struct Data pesquisa){
+     FILE *f = NULL;
+     int linha = 0;
+     
+     f = abreArquivo(DATABASE_VENCIMENTO_CLIENTE, F_READ);
+     if(!f) return ;
+     
+     initResultadoPesquisa(r);
+     
+     while(!feof(f)){
+        struct Data d;
+        
+        linha++;
+        fscanf(f, "%d %d %d", &d.dia, &d.mes, &d.ano);
+                
+        if((d.ano <= pesquisa.ano) && (d.mes <= pesquisa.mes))
+           if((d.mes < pesquisa.mes) || (d.dia < pesquisa.dia)){
+               r->qtd++;
+               if(r->qtd == 1){ //primeiro resultado da busca
+                  r->resultado = (int*) malloc(sizeof(int));
+                  r->resultado[0] = qualId(linha);
+                  if(!r->resultado[0]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
+                     printf("ERRO: ID nao existe para sua referencia\n");
+                     free(r->resultado);
+                     r->resultado = NULL;
+                     r->qtd = 0;
+                     return ;
+                  }
+               }
+               
+               else{
+                  r->resultado = (int*) realloc(r->resultado, r->qtd * sizeof(int));
+                  r->resultado[r->qtd - 1] = qualId(linha);
+                  
+                  if(!r->resultado[r->qtd-1]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
+                     printf("ERRO: ID nao existe para sua referencia\n");
+                     free(r->resultado);
+                     r->resultado = NULL;
+                     r->qtd = 0;
+                     return ;
+                  }
+               }
+           }
      }
 }
