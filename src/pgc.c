@@ -107,10 +107,8 @@ int buildId(struct Cliente *c, int id){
         fscanf(f, "%d", &aux);
         
         if(aux == id){
-           if(fclose(f)){
-              printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-              getchar();
-           }
+           fechaArquivo(f);
+           
            c->id = id;
            return linha;
         }
@@ -118,7 +116,7 @@ int buildId(struct Cliente *c, int id){
      
      fechaArquivo(f);
      
-     return 1;
+     return 0;
 }
 
 /* SELECIONA NOME DO CLIENTE DE ACORDO COM A LINHA NA BASE DE DADOS */
@@ -138,15 +136,12 @@ int buildNome(struct Cliente *c){
        if(linha == c->linha){
                 int ultChar = strlen(aux) - 1;
                 
-                if(aux[ultChar] == 10) aux[ultChar] = 0;
+                if(aux[ultChar] == 10)
+                   aux[ultChar] = 0;
                 
                 strcpy(c->nome, aux);
                 
-                if(fclose(f)){
-                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-                   getchar();
-                }
-                
+                fechaArquivo(f);
                 return 1;
        }
     }
@@ -174,11 +169,7 @@ int buildTelefone(struct Cliente *c){
                 aux[8] = 0;
                 strcpy(c->telefone, aux);
                 
-                if(fclose(f)){
-                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-                   getchar();
-                }
-                
+                fechaArquivo(f);                
                 return 1;
        }
     }
@@ -206,11 +197,7 @@ int buildCelular(struct Cliente *c){
                 aux[8] = 0;
                 strcpy(c->celular, aux);
                 
-                if(fclose(f)){
-                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-                   getchar();
-                }
-                
+                fechaArquivo(f);                
                 return 1;
        }
     }
@@ -241,11 +228,7 @@ int buildEmail(struct Cliente *c){
                 
                 strcpy(c->email, aux);
                 
-                if(fclose(f)){
-                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-                   getchar();
-                }
-                
+                fechaArquivo(f);
                 return 1;
        }
     }
@@ -272,11 +255,7 @@ int buildSaldo(struct Cliente *c){
                 
                 c->saldo = aux;
                 
-                if(fclose(f)){
-                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-                   getchar();
-                }
-                
+                fechaArquivo(f);
                 return 1;
        }
     }
@@ -306,11 +285,7 @@ int buildVencimento(struct Cliente *c){
                 c->vencimento.mes = m;
                 c->vencimento.ano = a;
                 
-                if(fclose(f)){
-                   printf("Problemas ao fechar o arquivo de dados\n<ENTER>");
-                   getchar();
-                }
-                
+                fechaArquivo(f);
                 return 1;
        }
     }
@@ -376,12 +351,8 @@ int buildClienteById(struct Cliente *c, int id){
 void exibirTodosDados(){
      FILE *f = NULL;
      
-     f = fopen(DATABASE_ID_CLIENTE, F_READ);
-     if(!f){
-        printf("ERRO: Ocorreu um erro ao tentar ler a base de dados\n<ENTER>");
-        getchar();
-        return ;
-     }
+     f = abreArquivo(DATABASE_ID_CLIENTE, F_READ);
+     if(!f) return ;
      
      while(!feof(f)){
         struct Cliente c;
@@ -392,10 +363,38 @@ void exibirTodosDados(){
            printCliente(&c);
      }
      
-     if(fclose(f)){
-        printf("ERRO: Problemas ao fechar o arquivo de dados\n<ENTER>");
-        getchar();
+     fechaArquivo(f);
+}
+
+/* USADA PARA FINALIZAR PESQUISA QUANDO UM ERRO GRAVE ACONTECER */
+void limpaResultadoPesquisa(struct ResultadoPesquisa *r){
+     printf("ERRO: ID nao existe para sua referencia\n");
+     
+     free(r->resultado);
+     r->resultado = NULL;
+     r->qtd = 0;
+}
+
+/* ADICIONA UM ID AO RESULTADO DA PESQUISA 
+   RETORNA 1 SE OK E 0 SE DEU ERRO      */
+int adicionaIdResultadoPesquisa(struct ResultadoPesquisa *r, int linha){    
+     r->qtd++;
+     
+     if(r->qtd == 1){ //primeiro resultado da busca
+        r->resultado = (int*) malloc(sizeof(int));
+        r->resultado[0] = qualId(linha);
      }
+        
+     else{
+        r->resultado = (int*) realloc(r->resultado, r->qtd * sizeof(int));
+        r->resultado[r->qtd - 1] = qualId(linha);
+     }
+     
+     if(!r->resultado[r->qtd-1]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
+        limpaResultadoPesquisa(r);
+        return 0;
+     }
+     return 1;
 }
 
 /* PESQUISA UM NOME E RETORNA UM ARRAY ID DE OCORRENCIAS */
@@ -414,35 +413,14 @@ void buscarNome(struct ResultadoPesquisa *r, char *pesquisa){
        linha++;
        fgets(aux, 499, f);
        
-       if( strstr(strupr(aux), pesquisa) ){
-          
-          r->qtd++;
-          if(r->qtd == 1){ //primeiro resultado da busca
-             r->resultado = (int*) malloc(sizeof(int));
-             r->resultado[0] = qualId(linha);
-             if(!r->resultado[0]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
-                printf("ERRO: ID nao existe para sua referencia\n");
-                free(r->resultado);
-                r->resultado = NULL;
-                r->qtd = 0;
-                return ;
-             }
+       if( strstr(strupr(aux), pesquisa) )
+          if(!adicionaIdResultadoPesquisa(r, linha)){
+             fechaArquivo(f);
+             return ;
           }
-          
-          else{
-             r->resultado = (int*) realloc(r->resultado, r->qtd * sizeof(int));
-             r->resultado[r->qtd - 1] = qualId(linha);
-             
-             if(!r->resultado[r->qtd-1]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
-                printf("ERRO: ID nao existe para sua referencia\n");
-                free(r->resultado);
-                r->resultado = NULL;
-                r->qtd = 0;
-                return ;
-             }
-          }
-       }
+    
     }
+    fechaArquivo(f);
 }
 
 /* BUSCA CLIENTES COM SALDO MAIOR( MODO = 1 ) OU MENOR( MODO = 2 ) QUE UM VALOR */
@@ -469,37 +447,16 @@ void buscarSaldo(struct ResultadoPesquisa *r, float valor, int modo){
            if(aux < valor) cond = 1;
         }
         
-        if(cond){
-           
-           r->qtd++;
-           if(r->qtd == 1){ //primeiro resultado da busca
-              r->resultado = (int*) malloc(sizeof(int));
-              r->resultado[0] = qualId(linha);
-              if(!r->resultado[0]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
-                 printf("ERRO: ID nao existe para sua referencia\n");
-                 free(r->resultado);
-                 r->resultado = NULL;
-                 r->qtd = 0;
-                 return ;
-              }
+        if(cond)
+           if(!adicionaIdResultadoPesquisa(r, linha)){
+              fechaArquivo(f);
+              return ;
            }
-           
-           else{
-              r->resultado = (int*) realloc(r->resultado, r->qtd * sizeof(int));
-              r->resultado[r->qtd - 1] = qualId(linha);
-              
-              if(!r->resultado[r->qtd-1]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
-                 printf("ERRO: ID nao existe para sua referencia\n");
-                 free(r->resultado);
-                 r->resultado = NULL;
-                 r->qtd = 0;
-                 return ;
-              }
-           }
-        }
      }
+     fechaArquivo(f);
 }
 
+/* BUSCA CLIENTES COM PRAZO MAXIMO DE PAGAMENTO ATE DD/MM/AA */
 void pesquisarPrazoAte(struct ResultadoPesquisa *r, struct Data pesquisa){
      FILE *f = NULL;
      int linha = 0;
@@ -516,32 +473,11 @@ void pesquisarPrazoAte(struct ResultadoPesquisa *r, struct Data pesquisa){
         fscanf(f, "%d %d %d", &d.dia, &d.mes, &d.ano);
                 
         if((d.ano <= pesquisa.ano) && (d.mes <= pesquisa.mes))
-           if((d.mes < pesquisa.mes) || (d.dia < pesquisa.dia)){
-               r->qtd++;
-               if(r->qtd == 1){ //primeiro resultado da busca
-                  r->resultado = (int*) malloc(sizeof(int));
-                  r->resultado[0] = qualId(linha);
-                  if(!r->resultado[0]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
-                     printf("ERRO: ID nao existe para sua referencia\n");
-                     free(r->resultado);
-                     r->resultado = NULL;
-                     r->qtd = 0;
-                     return ;
-                  }
-               }
-               
-               else{
-                  r->resultado = (int*) realloc(r->resultado, r->qtd * sizeof(int));
-                  r->resultado[r->qtd - 1] = qualId(linha);
-                  
-                  if(!r->resultado[r->qtd-1]){ //ERRO GRAVE: NAO EXISTE ID PARA ESSA LINHA
-                     printf("ERRO: ID nao existe para sua referencia\n");
-                     free(r->resultado);
-                     r->resultado = NULL;
-                     r->qtd = 0;
-                     return ;
-                  }
-               }
-           }
+           if((d.mes < pesquisa.mes) || (d.dia < pesquisa.dia))
+              if(!adicionaIdResultadoPesquisa(r, linha)){
+                 fechaArquivo(f);
+                 return ;
+              }
      }
+     fechaArquivo(f);
 }

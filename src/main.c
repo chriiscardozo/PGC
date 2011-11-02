@@ -212,9 +212,9 @@ void pesquisarPrazo(){
      struct ResultadoPesquisa r;
  
      system("cls");
-     printf("\t\t -------------------------------- \n");
-     printf("\t\t| PESQUISAR - PRAZO DE PAGAMENTO |\n");
-     printf("\t\t -------------------------------- \n");
+     printf("\t\t\t -------------------------------- \n");
+     printf("\t\t\t| PESQUISAR - PRAZO DE PAGAMENTO |\n");
+     printf("\t\t\t -------------------------------- \n");
      
      printf("\nDia(dd): ");
      pesquisa.dia = leNumero();
@@ -254,9 +254,9 @@ void pesquisar(){
      
      do{
          system("cls");
-         printf("\t\t\t ----------- \n");
-         printf("\t\t\t| PESQUISAR |\n");
-         printf("\t\t\t ----------- \n");
+         printf("\t\t\t\t ----------- \n");
+         printf("\t\t\t\t| PESQUISAR |\n");
+         printf("\t\t\t\t ----------- \n");
     
          printf("Pesquisar por:\n");
          printf(" 1 - Nome\n");
