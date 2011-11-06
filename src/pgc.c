@@ -22,6 +22,7 @@ void hojeIs(struct Data *h){
      h->ano = t->tm_year+1900;
 }
 
+/* POSICIONA O CURSOR(PONTEIRO DE FILE) NO FINAL DO ARQUIVO */
 void goToEOF(FILE *f){
      while(!feof(f)){
         char buffer[51] = { 0 };
@@ -89,6 +90,7 @@ void apagaArqTemporario(){
      system(comando);
 }
 
+/* ATRIBUI UM NOME AO CLIENTE */
 void setNomeCliente(struct Cliente *c){
     do{
        printf("Nome: ");
@@ -96,6 +98,7 @@ void setNomeCliente(struct Cliente *c){
     }while(strlen(c->nome) < 1);
 }
 
+/* ATRIBUI UM TELEFONE AO CLIENTE */
 void setTelefoneCliente(struct Cliente *c){
     do{
        printf("Telefone(8 digitos): ");
@@ -103,6 +106,7 @@ void setTelefoneCliente(struct Cliente *c){
     }while(strlen(c->telefone) != 8);
 }
 
+/* ATRIBUI UM CELULAR AO CLIENTE */
 void setCelularCliente(struct Cliente *c){
     do{
        printf("Celular(8 digitos): ");
@@ -110,11 +114,29 @@ void setCelularCliente(struct Cliente *c){
     }while(strlen(c->celular) != 8);
 }
 
+/* ATRIBUI UM EMAIL AO CLIENTE */
 void setEmailCliente(struct Cliente *c){
     do{
        printf("Email: ");
        gets(c->email);
     }while(strlen(c->email) < 1);
+}
+
+/* ATRIBUI UM SALDO AO CLIENTE */
+void setSaldoCliente(struct Cliente *c){
+     printf("Saldo(Ex.: 40.50): ");
+     c->saldo = leNumero();
+}
+
+/* ATRIBUI UM PRAZO DE VENCIMENTO AO CLIENTE */
+void setVencimentoCliente(struct Cliente *c){
+     printf("Prazo maximo de pagamento\n");
+     printf("Dia(dd): ");
+     c->vencimento.dia = leNumero();
+     printf("Mes(mm): ");
+     c->vencimento.mes = leNumero();
+     printf("Ano(aa): ");
+     c->vencimento.ano = leNumero();
 }
 
 /* LE INFORMAÇÕES BÁSICAS DE UM CLIENTE
@@ -641,8 +663,8 @@ void pesquisarPrazoAte(struct ResultadoPesquisa *r, struct Data pesquisa){
         linha++;
         fscanf(f, "%d %d %d", &d.dia, &d.mes, &d.ano);
                 
-        if((d.ano <= pesquisa.ano) && (d.mes <= pesquisa.mes))
-           if((d.mes < pesquisa.mes) || (d.dia < pesquisa.dia))
+        if(d.ano <= pesquisa.ano)
+           if(((d.mes == pesquisa.mes) && (d.dia <= pesquisa.dia)) || (d.mes < pesquisa.mes))
               if(!adicionaIdResultadoPesquisa(r, linha)){
                  fechaArquivo(f);
                  return ;
@@ -747,4 +769,210 @@ void apagarCliente(int linha){
         printf("ERRO GRAVE: Vencimento sem referencia\n<ENTER>");
         getchar();
      }
+}
+
+/* ATUALIZA A LINHA DO CLIENTE COPIANDO PARA UM ARQUIVO TEMPORARIO */
+int atualizarClienteTEMP(char info[], FILE *f, int linha){
+    int sucesso = 0;
+    int linhaAtual = 0;
+    int linhasCopiadas = 0;
+    FILE *temp = abreArquivo(DATABASE_TEMP, F_WRITE);
+    
+    if(!temp) return 0;
+    
+    while(!feof(f)){
+       char aux[500] = { 0 };
+       linhaAtual++;
+       fgets(aux, 499, f);
+       
+       if(linhasCopiadas) fputc(10, temp);
+       
+       if(linhaAtual == linha){ //Aqui atualiza a informação
+          fputs(info, temp);
+          sucesso = 1;
+          linhasCopiadas++;
+          continue;
+       }
+       else if(aux[strlen(aux) - 1] == 10){
+            aux[strlen(aux) - 1] = 0;
+            fputs(aux, temp);
+       }
+       
+       linhasCopiadas++;
+    }
+    
+    fechaArquivo(f);
+    fechaArquivo(temp);
+    
+    return sucesso;
+}
+
+/* ATUALIZA SALDO (CASO ESPECIFICO POR SE TRATAR DE UM FLOAT) */
+void atualizaSaldo(struct Cliente *c){
+     int linhaAtual = 0;
+     int linhasCopiadas = 0;
+     FILE *temp = abreArquivo(DATABASE_TEMP, F_WRITE);
+     FILE *f = abreArquivo(DATABASE_SALDO_CLIENTE, F_READ);
+     
+     if((!f) || (!temp)) return ;
+     
+     while(!feof(f)){
+       char aux[500] = { 0 };
+       linhaAtual++;
+       fgets(aux, 499, f);
+       
+       if(linhasCopiadas) fputc(10, temp);
+       
+       if(linhaAtual == c->linha){ //Aqui atualiza a informação
+          fprintf(f, "%f", c->saldo);
+          linhasCopiadas++;
+          continue;
+       }
+       else if(aux[strlen(aux) - 1] == 10){
+            aux[strlen(aux) - 1] = 0;
+            fputs(aux, temp);
+       }
+       
+       linhasCopiadas++;
+    }
+    fechaArquivo(f);
+    fechaArquivo(temp);
+    
+    f = abreArquivo(DATABASE_SALDO_CLIENTE, F_WRITE);
+    temp = abreArquivo(DATABASE_TEMP, F_READ);
+     
+    if((!f) || (!temp)){
+       printf("ERRO: erro ao tentar abrir *f e *temp para repor a atualizacao\n<ENTER>");
+       getchar();
+       return ;
+    }
+    
+    copiaArquivo(temp, f, 0);
+    
+    fechaArquivo(f);
+    fechaArquivo(temp);
+    apagaArqTemporario();
+}
+
+/* ATUALIZA VENCIMENTO (CASO ESPECIFICO POR SE TRATAR DE UMA STRUCT DATA) */
+void atualizaVencimento(struct Cliente *c){
+     int linhaAtual = 0;
+     int linhasCopiadas = 0;
+     FILE *temp = abreArquivo(DATABASE_TEMP, F_WRITE);
+     FILE *f = abreArquivo(DATABASE_VENCIMENTO_CLIENTE, F_READ);
+     
+     if((!f) || (!temp)) return ;
+     
+     while(!feof(f)){
+       char aux[500] = { 0 };
+       linhaAtual++;
+       fgets(aux, 499, f);
+       
+       if(linhasCopiadas) fputc(10, temp);
+       
+       if(linhaAtual == c->linha){ //Aqui atualiza a informação
+          fprintf(f, "%d %d %d", c->vencimento.dia, c->vencimento.mes, c->vencimento.ano);
+          linhasCopiadas++;
+          continue;
+       }
+       else if(aux[strlen(aux) - 1] == 10){
+            aux[strlen(aux) - 1] = 0;
+            fputs(aux, temp);
+       }
+       
+       linhasCopiadas++;
+    }
+    fechaArquivo(f);
+    fechaArquivo(temp);
+    
+    f = abreArquivo(DATABASE_VENCIMENTO_CLIENTE, F_WRITE);
+    temp = abreArquivo(DATABASE_TEMP, F_READ);
+     
+    if((!f) || (!temp)){
+       printf("ERRO: erro ao tentar abrir *f e *temp para repor a atualizacao\n<ENTER>");
+       getchar();
+       return ;
+    }
+    
+    copiaArquivo(temp, f, 0);
+    
+    fechaArquivo(f);
+    fechaArquivo(temp);
+    apagaArqTemporario();
+}
+
+/* ALTERA INFORMACOES DO CLIENTE DE ACORDO COM A OPÇÃO E ATUALIZA NA BASE DE DADOS */
+void alterarInformacoesCliente(struct Cliente *c, int op){
+     char *caminho, informacao[500] = { 0 };
+     FILE *f = NULL;
+     FILE *temp = NULL;
+     
+     if(op == 1){
+        caminho = (char*) malloc(strlen(DATABASE_NOME_CLIENTE) * sizeof(char) + 1);
+        memset(caminho, 0, strlen(DATABASE_NOME_CLIENTE) * sizeof(char) + 1);
+        setNomeCliente(c);
+        strcpy(caminho, DATABASE_NOME_CLIENTE);
+        strcpy(informacao, c->nome);
+     }
+     
+     if(op == 2){
+        caminho = (char*) malloc(strlen(DATABASE_TELEFONE_CLIENTE) * sizeof(char) + 1);
+        memset(caminho, 0, strlen(DATABASE_TELEFONE_CLIENTE) * sizeof(char) + 1);
+        setTelefoneCliente(c);
+        strcpy(caminho, DATABASE_TELEFONE_CLIENTE);
+        strcpy(informacao, c->telefone);
+     }
+     
+     if(op == 3){
+        caminho = (char*) malloc(strlen(DATABASE_CELULAR_CLIENTE) * sizeof(char) + 1);
+        memset(caminho, 0, strlen(DATABASE_CELULAR_CLIENTE) * sizeof(char) + 1);
+        setCelularCliente(c);
+        strcpy(caminho, DATABASE_CELULAR_CLIENTE);
+        strcpy(informacao, c->celular);
+     }
+     
+     if(op == 4){
+        caminho = (char*) malloc(strlen(DATABASE_EMAIL_CLIENTE) * sizeof(char) + 1);
+        memset(caminho, 0, strlen(DATABASE_EMAIL_CLIENTE) * sizeof(char) + 1);
+        setEmailCliente(c);
+        strcpy(caminho, DATABASE_EMAIL_CLIENTE);
+        strcpy(informacao, c->email);
+     }
+     
+     if(op == 5){ //Caso específico para saldo
+        setSaldoCliente(c);
+        atualizaSaldo(c);
+        return ;
+     }
+     
+     if(op == 6){ //Caso específico para data de vencimento
+        setVencimentoCliente(c);
+        atualizaVencimento(c);
+        return ;
+     }
+     
+     f = abreArquivo(caminho, F_READ);
+     if(!f) return ;
+     
+     if(!atualizarClienteTEMP(informacao, f, c->linha)){
+        printf("ERRO: erro ao tentar atualizar cliente para arquivo temporario\n<ENTER>");
+        getchar();
+        return ;
+     }
+     
+     f = abreArquivo(caminho, F_WRITE);
+     temp = abreArquivo(DATABASE_TEMP, F_READ);
+     
+     if((!f) || (!temp)){
+        printf("ERRO: erro ao tentar abrir *f e *temp para repor a atualizacao\n<ENTER>");
+        getchar();
+        return ;
+     }
+     
+     copiaArquivo(temp, f, 0);
+     
+     fechaArquivo(f);
+     fechaArquivo(temp);
+     free(caminho);
+     apagaArqTemporario();
 }

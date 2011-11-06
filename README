@@ -27,11 +27,10 @@ Cada 'campo' de cliente possui um arquivo .pgc e as informações são dispostas de
 
 About the "PGC" - Client Management Program
 
-A simple program made in C that work like a client agenda. Save basics informations like name, contact numbers, balance, max. time of payment, etc.
-This program don't use any SGDB(DBMS - database management system). The data is save in files .pgc, in the path 'database'. The data is accessed by file manipulation functions in C.
+A simple program made in C that works like a client agenda keeping basic informations like name, phone numbers, balance, maximum time of payment, etc.
+It wasn't used any SGBD (DBMS - Database Management System). All data are kept in .pgc files in a folder called 'database' and they are accessed by file manipulation functions in C.
 
 
+About the information's organization
 
-About the organization of information
-
-Each client 'field' has a file in .pgc and the information is arranged so that each row belong a client.
+Each client 'field' has a .pgc file and the informations are arranged in a way to each file line to belong to a certain client, making easy the access to the informations by the program.

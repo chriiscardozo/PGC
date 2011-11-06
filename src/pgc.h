@@ -68,3 +68,5 @@ extern void buscarSaldo(struct ResultadoPesquisa *r, float valor, int modo);
 extern void pesquisarPrazoAte(struct ResultadoPesquisa *r, struct Data pesquisa);
 
 extern void apagarCliente(int linha);
+
+extern void alterarInformacoesCliente(struct Cliente *c, int op);

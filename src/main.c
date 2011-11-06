@@ -266,43 +266,36 @@ void pesquisar(){
     
     return ;
 }
-/*
-void alterarDadosCliente(int id){
-     struct Cliente c;
+
+/* ALTER CLIENT'S DATA */
+void alterarDadosClienteMenu(struct Cliente *c){
      int op;
-     if(buildClienteById(&c, id)){
-        do{
-           system("cls");
-           printCliente(&c);
-           printf("\n\nAlterar:\n");
-           printf(" 1 - Nome\n");
-           printf(" 2 - Telefone\n");
-           printf(" 3 - Celular\n");
-           printf(" 4 - Emailn");
-           printf(" 5 - Saldo\n");
-           printf(" 6 - Vencimento\n");
-           printf("\n 7 - Finalizar");
-           
-           do{
-              printf("\nDigite uma opcao e de <ENTER>: "); 
-              op = leNumero();
-           }while(op < 1 || op > 7);
-           
-           if(op == 1) alterarNomeCliente(&c);
-           else if(op == 2) alterarTelefoneCliente(&c);
-           else if(op == 3) alterarCelularCliente(&c);
-           else if(op == 4) alterarEmailCliente(&c);
-           else if(op == 5) alterarSaldoCliente(&c);
-           else if(op == 6) alterarVencimentoCliente(&c);
-           
-
-        }while(op != 7);
-     }
      
-}*/
+     while(1){
+        system("cls");
+        printCliente(c);
+        printf("\n\nAlterar:\n");
+        printf(" 1 - Nome\n");
+        printf(" 2 - Telefone\n");
+        printf(" 3 - Celular\n");
+        printf(" 4 - Email\n");
+        printf(" 5 - Saldo\n");
+        printf(" 6 - Vencimento\n");
+        printf("\n 7 - Finalizar");
+        
+        do{
+           printf("\nDigite uma opcao e de <ENTER>: "); 
+           op = leNumero();
+        }while(op < 1 || op > 7);
+        
+        if(op == 7) break;
+        else alterarInformacoesCliente(c, op);
+     }
+}
 
-/* UPDATE CLIENT'S DATA *//*
+/* CHOOSE A CLIENT TO ALTER DATA */
 void alterarDados(){
+     struct Cliente c;
      int id;   
      
      system("cls");
@@ -312,10 +305,13 @@ void alterarDados(){
      
      printf("\n\nDigite o ID do cliente: ");
      id = leNumero();
-
-     alterarDadosCliente(id);
      
-}*/
+     if(!buildClienteById(&c, id))
+        alterarDados();
+     
+     else alterarDadosClienteMenu(&c);
+     
+}
 
 /* DELETE A CLIENT */
 void apagarRegistroCliente(){
@@ -362,7 +358,7 @@ int main(){
        
        if(op == 1) novoCliente();
        else if(op == 2) apagarRegistroCliente();
-       else if(op == 3) ;//alterarDados();
+       else if(op == 3) alterarDados();
        else if(op == 4) exibirDados();
        else if(op == 5) exibirTodosComp();
        else if(op == 6) exibirTodosNome();
