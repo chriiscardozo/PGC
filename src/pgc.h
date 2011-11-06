@@ -12,6 +12,8 @@
 #define DATABASE_TELEFONE_CLIENTE "database\\telefoneCliente.pgc"
 #define DATABASE_SALDO_CLIENTE "database\\saldoCliente.pgc"
 #define DATABASE_VENCIMENTO_CLIENTE "database\\vencimentoCliente.pgc"
+#define DATABASE_ID_CONTROL "database\\id_control.pgc"
+#define DATABASE_TEMP "database\\temp.pgc"
 
 struct ResultadoPesquisa{
        int *resultado;
@@ -35,6 +37,8 @@ struct Cliente{
        int linha;
 };
 
+extern float leNumero();
+
 extern void hojeIs(struct Data *h);
 
 extern void fechaArquivo(FILE *f);
@@ -42,6 +46,10 @@ extern void fechaArquivo(FILE *f);
 extern FILE* abreArquivo(char *caminho, char *modo);
 
 extern void initCliente(struct Cliente *c);
+
+extern void leInformacoesBasicasCliente(struct Cliente *c);
+
+extern void salvarNovoCliente(struct Cliente *c);
 
 extern void buscarNome(struct ResultadoPesquisa *r, char *pesquisa);
 
@@ -58,3 +66,5 @@ extern void printCliente(struct Cliente *c);
 extern void buscarSaldo(struct ResultadoPesquisa *r, float valor, int modo);
 
 extern void pesquisarPrazoAte(struct ResultadoPesquisa *r, struct Data pesquisa);
+
+extern void apagarCliente(int linha);

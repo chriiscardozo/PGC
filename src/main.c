@@ -4,14 +4,6 @@
 #include <dos.h>
 #include "pgc.h"
 
-/* READ A NUMBER AND RETURN THIS */
-float leNumero(){
-    float n;
-    scanf("%f", &n);
-    fflush(stdin);
-    return n;
-}
-
 /* MAIN MENU */
 int menuPrincipal(){
      int op;
@@ -274,6 +266,91 @@ void pesquisar(){
     
     return ;
 }
+/*
+void alterarDadosCliente(int id){
+     struct Cliente c;
+     int op;
+     if(buildClienteById(&c, id)){
+        do{
+           system("cls");
+           printCliente(&c);
+           printf("\n\nAlterar:\n");
+           printf(" 1 - Nome\n");
+           printf(" 2 - Telefone\n");
+           printf(" 3 - Celular\n");
+           printf(" 4 - Emailn");
+           printf(" 5 - Saldo\n");
+           printf(" 6 - Vencimento\n");
+           printf("\n 7 - Finalizar");
+           
+           do{
+              printf("\nDigite uma opcao e de <ENTER>: "); 
+              op = leNumero();
+           }while(op < 1 || op > 7);
+           
+           if(op == 1) alterarNomeCliente(&c);
+           else if(op == 2) alterarTelefoneCliente(&c);
+           else if(op == 3) alterarCelularCliente(&c);
+           else if(op == 4) alterarEmailCliente(&c);
+           else if(op == 5) alterarSaldoCliente(&c);
+           else if(op == 6) alterarVencimentoCliente(&c);
+           
+
+        }while(op != 7);
+     }
+     
+}*/
+
+/* UPDATE CLIENT'S DATA *//*
+void alterarDados(){
+     int id;   
+     
+     system("cls");
+     printf("\t\t\t ----------------------------- \n");
+     printf("\t\t\t| ALTERAR DADOS DE UM CLIENTE |\n");
+     printf("\t\t\t ----------------------------- \n");
+     
+     printf("\n\nDigite o ID do cliente: ");
+     id = leNumero();
+
+     alterarDadosCliente(id);
+     
+}*/
+
+/* DELETE A CLIENT */
+void apagarRegistroCliente(){
+     int id;   
+     struct Cliente c;
+     system("cls");
+     printf("\t\t\t\t ---------------- \n");
+     printf("\t\t\t\t| APAGAR CLIENTE |\n");
+     printf("\t\t\t\t ---------------- \n");
+     
+     printf("\n\nDigite o ID do cliente: ");
+     id = leNumero();
+     
+     if(buildClienteById(&c, id)){  
+        printf("Voce tem certeza que deseja apagar este cliente?\n");
+        printCliente(&c);
+        printf("\n\n1 - Sim\n2 - Cancelar\nDigite um numero e de <ENTER>: ");
+        if(leNumero() == 1) apagarCliente(c.linha);
+     }
+}
+
+/* SAVE A NEW CLIENT */
+void novoCliente(){ 
+     struct Cliente c;
+     system("cls");
+     printf("\t\t\t\t -------------- \n");
+     printf("\t\t\t\t| NOVO CLIENTE |\n");
+     printf("\t\t\t\t -------------- \n");
+     
+     printf("Informacoes vazias nao sao aceitas\nDica: use [-]s para quando nao houve informacao\n\n");
+     initCliente(&c);
+     leInformacoesBasicasCliente(&c);
+     salvarNovoCliente(&c);
+}
+     
 
 /* MAIN FUNCTION */
 int main(){
@@ -283,17 +360,14 @@ int main(){
     do{
        op = menuPrincipal();
        
-       if(op == 1) printf("novo");
-       else if(op == 2) printf("apagar");
-       else if(op == 3) printf("alterar");
+       if(op == 1) novoCliente();
+       else if(op == 2) apagarRegistroCliente();
+       else if(op == 3) ;//alterarDados();
        else if(op == 4) exibirDados();
        else if(op == 5) exibirTodosComp();
        else if(op == 6) exibirTodosNome();
        else if(op == 7) pesquisar();
     }while(op != 8);
     
-    printf("\n\nFIM");
-    
-    getchar();
     return 0;
 }
