@@ -302,10 +302,11 @@ void alterarDados(){
      printf("\t\t\t ----------------------------- \n");
      printf("\t\t\t| ALTERAR DADOS DE UM CLIENTE |\n");
      printf("\t\t\t ----------------------------- \n");
-     
-     printf("\n\nDigite o ID do cliente: ");
+
+     printf("\n\nDigite o ID do cliente( 0 para cancelar ): ");
      id = leNumero();
      
+     if(!id) return ;
      if(!buildClienteById(&c, id))
         alterarDados();
      
